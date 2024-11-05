@@ -15,7 +15,7 @@ export class GenerateToken {
         const tokenValue = Math.floor(1000 + Math.random() * 9000).toString();
         const notificationId = new NotificationId(uuidv4());
         const expiration = new Date();
-        expiration.setMinutes(expiration.getMinutes() + 5);
+        expiration.setHours(expiration.getHours() + 23);
 
         const token = new Token(
             new TokenId(uuidv4()), // Usar TokenId correctamente
