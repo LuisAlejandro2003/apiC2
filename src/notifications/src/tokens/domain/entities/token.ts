@@ -1,10 +1,16 @@
-import { v4 as uuidv4 } from 'uuid';
+import { TokenId } from '../value-objects/tokenId';
 
 export class Token {
     constructor(
-        public uuid: string = uuidv4(), // Genera un UUID por defecto si no se proporciona
-        public value: string,
-        public userId: string,
-        public createdAt: Date = new Date() // Fecha de creación por defecto
+        public readonly uuid: TokenId, // Usa TokenId aquí
+        public readonly value: string,
+        public readonly userId: string,
+        public readonly createdAt: Date,
+        public readonly expiration: Date,
+        public readonly notificationId: string 
     ) {}
+
+    isExpired(): boolean {
+        return new Date() > this.expiration;
+    }
 }

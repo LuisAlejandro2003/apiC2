@@ -3,11 +3,11 @@ import { GenerateToken } from '../../../tokens/application/use-cases/generateTok
 
 export class NotificationsController {
     constructor(
-        private sendNotification: SendNotification,
-        private generateToken?: GenerateToken // Añadimos la dependencia opcional
+        public sendNotification: SendNotification,
+        public generateToken?: GenerateToken // Añadimos la dependencia opcional
     ) {}
 
-    async handleNotification(event: string, payload: { email: string; contactId: string; phoneNumber: string }): Promise<void> {
+     async handleNotification(event: string, payload: { email: string; contactId: string; phoneNumber: string }): Promise<void> {
         if (event === 'user.created') {
             // Genera y envía un token en lugar de una notificación por correo
             if (this.generateToken) {

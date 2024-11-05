@@ -1,8 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
+// src/notifications/domain/entities/notifications.ts
+
+import { NotificationId } from '../value-objects/notificationId';
 
 export class Notifications {
     constructor(
-        public idNotification: string,
+        public idNotification: NotificationId,
         public contactId: string,
         public email: string,
         public phoneNumber: string,

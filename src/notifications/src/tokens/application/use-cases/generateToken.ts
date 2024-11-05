@@ -1,25 +1,32 @@
-// src/tokens/application/use-cases/generateToken.ts
+import { TokenRepository } from '../../domain/ports/tokenRepository'; // Importar correctamente
+import { TokenSender } from '../../domain/ports/tokenSender'; // Importar correctamente
 import { Token } from '../../domain/entities/token';
-import { TokenRepository } from '../../domain/ports/tokenRepository';
-import { TokenSender } from '../../domain/ports/tokenSender';
+import { TokenId } from '../../domain/value-objects/tokenId';
+import { NotificationId } from '../../../notifications/domain/value-objects/notificationId';
+import { v4 as uuidv4 } from 'uuid';
 
 export class GenerateToken {
     constructor(
-        private tokenRepository: TokenRepository,
-        private tokenSender: TokenSender
+        private readonly tokenRepository: TokenRepository,
+        private readonly tokenSender: TokenSender
     ) {}
 
     async execute(contactId: string, phoneNumber: string): Promise<void> {
-        // Formatea el número de teléfono con el prefijo +521 si no lo tiene ya
-        const formattedPhoneNumber = phoneNumber.startsWith('+521') ? phoneNumber : `+521${phoneNumber}`;
-        const tokenValue = Math.floor(1000 + Math.random() * 9000).toString(); // Genera un token de 4 dígitos
-        const token = new Token(undefined, tokenValue, contactId);
-    
-        // Guarda el token en el repositorio
+        const tokenValue = Math.floor(1000 + Math.random() * 9000).toString();
+        const notificationId = new NotificationId(uuidv4());
+        const expiration = new Date();
+        expiration.setMinutes(expiration.getMinutes() + 5);
+
+        const token = new Token(
+            new TokenId(uuidv4()), // Usar TokenId correctamente
+            tokenValue,
+            contactId,
+            new Date(),
+            expiration,
+            notificationId.id // Asegúrate de pasar el valor correctamente si es un string
+        );
+
         await this.tokenRepository.saveToken(token);
-    
-        // Envía el token utilizando la interfaz
-        await this.tokenSender.sendToken(formattedPhoneNumber, tokenValue);
+        await this.tokenSender.sendToken(`+521${phoneNumber}`, tokenValue); // Prefijo incluido
     }
-    
 }

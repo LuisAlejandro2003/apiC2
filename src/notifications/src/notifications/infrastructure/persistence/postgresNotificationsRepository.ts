@@ -9,7 +9,7 @@ export class PostgresNotificationsRepository implements NotificationsRepository 
         await this.db.query(
             'INSERT INTO notifications (id_notification, contact_id, email, phone_number, date_sent) VALUES ($1, $2, $3, $4, $5)',
             [
-                notification.idNotification,
+                notification.idNotification.getValue(),
                 notification.contactId,
                 notification.email,
                 notification.phoneNumber,
