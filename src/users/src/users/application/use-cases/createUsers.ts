@@ -44,7 +44,7 @@ export class CreateUsers {
         // Emitir evento de creación
         await this.eventPublisher.emit('user.created', {
             email: userData.email,
-            contactId: contact.uuid,
+            contactId:userId.value,
             phoneNumber: contact.phoneNumber
         });
     }

@@ -11,6 +11,9 @@ export class PostgresTokenRepository implements TokenRepository {
         INSERT INTO tokens (uuid, value, user_id, created_at, expiration, notification_id)
         VALUES ($1, $2, $3, $4, $5, $6)
     `;
+
+
+ 
     const values = [
         token.uuid.getValue(),
         token.value,
