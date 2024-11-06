@@ -18,4 +18,18 @@ export class EventEmitter implements EventPublisher {
         this.channel.sendToQueue(event, Buffer.from(JSON.stringify(payload)));
         console.log(`Event sent to ${event}:`, payload);
     }
+
+
+
+    on(event: string, listener: (payload: any) => void): void {
+        if (!this.channel) {
+            throw new Error('Connection to RabbitMQ not established');
+        }
+        this.channel.consume(event, (msg) => {
+            if (msg !== null) {
+                listener(JSON.parse(msg.content.toString()));
+                this.channel!.ack(msg);
+            }
+        });
+    }
 }
