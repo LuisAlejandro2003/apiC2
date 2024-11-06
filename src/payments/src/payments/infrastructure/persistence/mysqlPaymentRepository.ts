@@ -48,7 +48,8 @@ export class MysqlPaymentRepository implements PaymentRepository {
             row.successUrl,
             row.failureUrl,
             row.approvalUrl,
-            row.status
+            row.status,
+            row.contactId
         );
     }
 
@@ -64,7 +65,8 @@ export class MysqlPaymentRepository implements PaymentRepository {
             row.successUrl,
             row.failureUrl,
             row.approvalUrl,
-            row.status
+            row.status,
+            row.contactId
         ));
     }
 }

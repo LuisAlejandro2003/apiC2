@@ -22,5 +22,10 @@ export async function initializeDependencies(): Promise<{
     const notificationsController = new NotificationsController(sendNotification);
     const rabbitMQListener = new RabbitMQListener(notificationsController);
 
+    // Inicia la escucha de las colas
+    rabbitMQListener.listenToQueues().catch(error => {
+        console.error("Error al escuchar las colas de RabbitMQ:", error);
+    });
+
     return { notificationsController, rabbitMQListener };
 }

@@ -56,7 +56,8 @@ export class CreatePayment {
             paymentDetails.successUrl,
             paymentDetails.failureUrl,
             approvalLink,
-            PaymentStatus.PENDIENTE
+            PaymentStatus.PENDIENTE,
+            paymentDetails.contactId
         );
 
         // Guarda el pago en la base de datos
@@ -64,9 +65,10 @@ export class CreatePayment {
 
         // Emitir el evento de creación de pago
         await this.eventPublisher.publish('payment.created', {
-            userId: paymentDetails.emailUser,
+            email: paymentDetails.emailUser,
             amount: paymentDetails.amount,
             approvalUrl: approvalLink,
+            contactId: payment.contactId 
         });
 
         return approvalLink;

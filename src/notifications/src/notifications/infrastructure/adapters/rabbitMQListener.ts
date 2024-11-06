@@ -5,9 +5,9 @@ export class RabbitMQListener {
     constructor(private notificationsController: NotificationsController) {}
 
     async listenToQueues(): Promise<void> {
-        const connection = await amqp.connect('amqp://localhost:5672');
+        const connection = await amqp.connect(process.env.RABBITMQ_URI || 'amqp://localhost');
         const channel = await connection.createChannel();
-        const queues = ['contact.created', 'user.created'];
+        const queues = ['contact.created', 'user.created', 'payments.created']; 
 
         for (const queue of queues) {
             await channel.assertQueue(queue, { durable: true });

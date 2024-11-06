@@ -11,11 +11,18 @@ export class EmailService {
     });
 
     async send(to: string, message: string): Promise<void> {
-        await this.transporter.sendMail({
-            from: '"Notifications" <no-reply@example.com>',
-            to,
-            subject: 'Notification',
-            text: message
-        });
+        try {
+            await this.transporter.sendMail({
+                from: "Notifications <no-reply@example.com>",
+                to,
+                subject: "Notification",
+                text: message,
+            });
+            console.log(`Correo enviado a ${to}`);
+        } catch (error) {
+            console.error("Error al enviar el correo:", error);
+            throw new Error("Error al enviar el correo");
+        }
     }
+    
 }
