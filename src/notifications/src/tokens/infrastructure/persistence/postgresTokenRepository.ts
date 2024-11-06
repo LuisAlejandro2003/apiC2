@@ -45,31 +45,35 @@ export class PostgresTokenRepository implements TokenRepository {
 
 
   
+ 
+
   async findByUserIdAndValue(userId: string, tokenValue: string): Promise<Token | null> {
     const result = await this.db.query(
         'SELECT * FROM tokens WHERE user_id = $1 AND value = $2',
         [userId, tokenValue]
     );
-    console.log('UserId:', userId);
-console.log('TokenValue:', tokenValue);
 
+    console.log('UserId:', userId);
+    console.log('TokenValue:', tokenValue);
 
     if (result.rows.length > 0) {
         const tokenData = result.rows[0];
-        // Verifica la cantidad de argumentos y ajusta la llamada a la función.
-return new Token(
-    tokenData.id,
-    tokenData.uuid,
-    tokenData.value,
-    tokenData.user_id,
-    new Date(tokenData.created_at),
-    tokenData.expiration,
-);
-
+        
+        // Asegúrate de crear el Token con los argumentos correctos
+        return new Token(
+            tokenData.uuid,              // UUID del token
+            tokenData.value,             // Valor del token
+            tokenData.user_id,           // ID del usuario
+            new Date(tokenData.created_at), // Fecha de creación
+            new Date(tokenData.expiration), // Fecha de expiración
+            tokenData.notification_id    // ID de la notificación
+        );
     }
 
-    return null; // Asegúrate de devolver `null` si no hay resultados
+    return null; // Devolver `null` si no se encontró el token
 }
+
+
 
 
 
