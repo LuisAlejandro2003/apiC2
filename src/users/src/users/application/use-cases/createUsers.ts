@@ -3,30 +3,31 @@ import { UsersRepository } from '../../domain/ports/usersRepository';
 import { UserId } from '../../domain/value-objects/userId';
 import { EventPublisher } from '../../domain/ports/EventPublisher';
 import { FindContactByEmail } from '../../../contacts/application/use-cases/findContactByEmail';
-import { ContactId } from '../../../contacts/domain/value-objects/contactId';
 import { PasswordHasher } from '../../domain/ports/PasswordHasher';
-
 
 export class CreateUsers {
     constructor(
         private usersRepository: UsersRepository,
         private findContactByEmail: FindContactByEmail,
         private eventPublisher: EventPublisher,
-        private passwordHasher: PasswordHasher // Inyecta la dependencia
+        private passwordHasher: PasswordHasher // Inyecta la dependencia usando el puerto
     ) {}
 
     async execute(userData: { email: string; password: string; }): Promise<void> {
         // Buscar el contacto por email
-        const contact = await this.findContactByEmail.execute(userData.email);
-        if (!contact) {
-            throw new Error('Email not associated with any contact');
+        const contacts = await this.findContactByEmail.execute(userData.email);
+        if (!contacts) {
+            throw new Error('Email not associated with any contacts');
         }
+
+        // Encapsular el acceso a contacts
+        const contactId = contacts.getContactsId();
+        const phoneNumber = contacts.getPhoneNumber();
 
         // Generar un nuevo ID de usuario
         const userId = new UserId();
-        const contactId = new ContactId(contact.uuid);
 
-        // Hashear la contraseña
+        // Hashear la contraseña usando el puerto
         const hashedPassword = await this.passwordHasher.hash(userData.password);
 
         // Crear la entidad de usuario
@@ -41,11 +42,11 @@ export class CreateUsers {
         // Guardar el usuario
         await this.usersRepository.createUser(user);
 
-        // Emitir evento de creación
+        // Emitir evento de creación usando el puerto
         await this.eventPublisher.emit('user.created', {
             email: userData.email,
-            contactId:userId.value,
-            phoneNumber: contact.phoneNumber
+            contactId: userId.value,
+            phoneNumber: phoneNumber
         });
     }
 }

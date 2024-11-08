@@ -1,22 +1,33 @@
 import amqp from 'amqplib';
 import { EventPublisher } from '../../domain/ports/EventPublisher';
 
-export class EventEmitter implements EventPublisher {
+export class EventEmitterAdapter implements EventPublisher {
     private connection: amqp.Connection | null = null;
     private channel: amqp.Channel | null = null;
 
     async connect(): Promise<void> {
-        this.connection = await amqp.connect('amqp://localhost');
+        this.connection = await amqp.connect('amqp://localhost:5672');
         this.channel = await this.connection.createChannel();
-        await this.channel.assertExchange('contactExchange', 'topic', { durable: true });
+        await this.channel.assertQueue('contacts.created', { durable: true });
     }
 
-    async emit(routingKey: string, message: object): Promise<void> {
+    async emit(event: string, payload: any): Promise<void> {
         if (!this.channel) {
-            throw new Error('Channel not initialized');
+            throw new Error('Connection to RabbitMQ not established');
         }
-        const msgBuffer = Buffer.from(JSON.stringify(message));
-        this.channel.publish('contactExchange', routingKey, msgBuffer);
-        console.log(`Message sent to ${routingKey}:`, message);
+        this.channel.sendToQueue(event, Buffer.from(JSON.stringify(payload)));
+        console.log(`Event sent to ${event}:`, payload);
+    }
+
+    on(event: string, listener: (payload: any) => void): void {
+        if (!this.channel) {
+            throw new Error('Connection to RabbitMQ not established');
+        }
+        this.channel.consume(event, (msg) => {
+            if (msg !== null) {
+                listener(JSON.parse(msg.content.toString()));
+                this.channel!.ack(msg);
+            }
+        });
     }
 }

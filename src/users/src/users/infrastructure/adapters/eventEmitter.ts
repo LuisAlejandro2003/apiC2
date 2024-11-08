@@ -1,7 +1,7 @@
 import amqp from 'amqplib';
 import { EventPublisher } from '../../domain/ports/EventPublisher';
 
-export class EventEmitter implements EventPublisher {
+export class EventEmitterAdapter implements EventPublisher {
     private connection: amqp.Connection | null = null;
     private channel: amqp.Channel | null = null;
 
@@ -18,8 +18,6 @@ export class EventEmitter implements EventPublisher {
         this.channel.sendToQueue(event, Buffer.from(JSON.stringify(payload)));
         console.log(`Event sent to ${event}:`, payload);
     }
-
-
 
     on(event: string, listener: (payload: any) => void): void {
         if (!this.channel) {

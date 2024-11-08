@@ -4,11 +4,11 @@ import { UsersController } from './controllers/usersController';
 import { CreateUsers } from '../application/use-cases/createUsers';
 import { MongoUsersRepository } from './persistence/mongoUsersRepository';
 import { MongoContactsRepository } from '../../contacts/infrastructure/persistence/mongoContacsRepository';
-import { EventEmitter } from '../infrastructure/adapters/eventEmitter';
+import { EventEmitterAdapter } from './adapters/eventEmitter';
 import { FindContactByEmail } from '../../contacts/application/use-cases/findContactByEmail';
-import { BcryptPasswordHasher } from '../infrastructure/services/PasswordHasher'; // Importa la implementación de bcrypt
-import { TokenValidatedSubscriber } from './adapters/tokenValidatedSubscriber'; // Importa el suscriptor
-import { UpdateUserVerifiedAt } from '../application/use-cases/updateUserVerifiedAt'; // Importa el caso de uso necesario
+import { BcryptPasswordHasher } from './services/PasswordHasher';
+import { TokenValidatedSubscriber } from './adapters/tokenValidatedSubscriber';
+import { UpdateUserVerifiedAt } from '../application/use-cases/updateUserVerifiedAt';
 
 dotenv.config();
 
@@ -19,19 +19,17 @@ export async function initializeUsersDependencies(): Promise<UsersController> {
 
     // Repositorios
     const usersRepository = new MongoUsersRepository(
-        mongoClient,
-        process.env.DB_NAME || 'microservicesClients'
+        mongoClient.db(process.env.DB_NAME || 'microservicesClients')
     );
     const contactsRepository = new MongoContactsRepository(
-        mongoClient,
-        process.env.DB_NAME || 'microservicesClients'
+        mongoClient.db(process.env.DB_NAME || 'microservicesClients')
     );
 
     // Caso de uso de búsqueda de contacto por email
     const findContactByEmail = new FindContactByEmail(contactsRepository);
 
     // Publicador de eventos
-    const eventPublisher = new EventEmitter();
+    const eventPublisher = new EventEmitterAdapter();
     await eventPublisher.connect();
 
     // Servicio de hash de contraseñas

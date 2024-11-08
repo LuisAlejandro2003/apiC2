@@ -1,10 +1,10 @@
 import { ContactsRepository } from '../../domain/ports/contactsRepository';
 import { Contacts } from '../../domain/entities/contacts';
 
-export class FindContactByEmail {
+export class UpdateContact {
     constructor(private contactsRepository: ContactsRepository) {}
 
-    async execute(email: string): Promise<Contacts | null> {
-        return this.contactsRepository.findByEmail(email);
+    async execute(uuid: string, contactData: Partial<Omit<Contacts, 'uuid'>>): Promise<void> {
+        await this.contactsRepository.updateContact(uuid, contactData);
     }
 }

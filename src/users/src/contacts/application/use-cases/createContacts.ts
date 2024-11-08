@@ -1,36 +1,47 @@
-import { Contacts } from '../../domain/entities/contacts';
 import { ContactsRepository } from '../../domain/ports/contactsRepository';
-import { EventPublisher } from '../../domain/ports/EventPublisher';
+import { Contacts } from '../../domain/entities/contacts';
 import { ContactId } from '../../domain/value-objects/contactId';
+import { EventPublisher } from '../../domain/ports/EventPublisher';
 
 export class CreateContacts {
+    private emittedEvents: Set<string> = new Set();
+
+    private isDuplicateEvent(event: string): boolean {
+        if (this.emittedEvents.has(event)) {
+            return true;
+        }
+        this.emittedEvents.add(event);
+        return false;
+    }
     constructor(
         private contactsRepository: ContactsRepository,
         private eventPublisher: EventPublisher
     ) {}
 
     async execute(contactData: {
+        uuid?: string;
+        email: string;
         firstName: string;
         lastName: string;
-        email: string;
         phoneNumber: string;
-        contactId?: string;
     }): Promise<void> {
-        // Generar un nuevo contactId si no se proporciona
-        const contactId = contactData.contactId ? new ContactId(contactData.contactId) : new ContactId();
+        const contacts = new Contacts(
+            contactData.uuid ?? ContactId.generateUUID(),
+            contactData.email,
+            contactData.firstName,
+            contactData.lastName,
+            contactData.phoneNumber
+        );
+        await this.contactsRepository.createContact(contacts);
 
-        // Crear la instancia del contacto
-        const contact = new Contacts(contactId.value, contactData.firstName, contactData.lastName, contactData.email, contactData.phoneNumber);
-
-        // Guardar el contacto en el repositorio
-        await this.contactsRepository.createContact(contact);
-
-        // Emitir el evento con contactId, email y phoneNumber
-        await this.eventPublisher.emit('contact.created', {
-            contactId: contact.uuid,
-            email: contact.email,
-            phoneNumber: contact.phoneNumber
-        });
+        // Emit event after creating the contact
+        // Emit event after creating the contact only if not already emitted
+if (!this.isDuplicateEvent('contact.created')) {
+    await this.eventPublisher.emit('contact.created', {
+        contactId: contacts.getContactsId().value,
+        email: contacts.getEmail(),
+        phoneNumber: contacts.getPhoneNumber()
+    });
+}
     }
 }
-
