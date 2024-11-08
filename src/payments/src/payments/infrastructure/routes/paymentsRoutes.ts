@@ -1,21 +1,16 @@
 import { Router, Request, Response } from 'express';
 import { initializeDependencies } from '../dependencies';
+import { PaymentsController } from '../controllers/paymentsController'; // Importa el controlador
 
 const router = Router();
 
-initializeDependencies().then(({ createPayment }) => {
-    router.post('/', async (req: Request, res: Response) => {
-        // En tu método `execute` o en la ruta de `paymentsRoutes.ts`
-console.log('Request received:', req.body);
-try {
-    const approvalUrl = await createPayment.execute(req.body);
-    console.log('Approval URL:', approvalUrl);
-    res.status(201).json({ approvalUrl });
-} catch (error) {
-    console.error('Error occurred:', error);
-    res.status(500).json({ message: error || 'Internal Server Error' });
-}
-    });
+initializeDependencies().then(({ createPayment, getAllPayments, getPaymentById, deletePaymentById }) => {
+    const controller = new PaymentsController(createPayment, getAllPayments, getPaymentById, deletePaymentById);
+
+    router.post('/', (req: Request, res: Response) => controller.create(req, res));
+    router.get('/', (req: Request, res: Response) => controller.getAll(req, res));
+    router.get('/:id', (req: Request, res: Response) => controller.getById(req, res));
+    router.delete('/:id', (req: Request, res: Response) => controller.deleteById(req, res));
 });
 
 export { router as paymentsRouter };

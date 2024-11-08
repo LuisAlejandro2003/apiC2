@@ -8,7 +8,7 @@ export class EventEmitterAdapter implements EventPublisher {
     async connect(): Promise<void> {
         this.connection = await amqp.connect('amqp://localhost:5672');
         this.channel = await this.connection.createChannel();
-        await this.channel.assertQueue('contacts.created', { durable: true });
+        await this.channel.assertQueue('contact.created', { durable: true });
     }
 
     async emit(event: string, payload: any): Promise<void> {

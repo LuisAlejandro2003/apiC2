@@ -1,6 +1,8 @@
+// src/notifications/infrastructure/services/emailService.ts
 import nodemailer from 'nodemailer';
+import { EmailServicePort } from '../../domain/ports/EmailServicePort';
 
-export class EmailService {
+export class EmailService implements EmailServicePort {
     private transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
         port: Number(process.env.EMAIL_PORT),
@@ -24,5 +26,4 @@ export class EmailService {
             throw new Error("Error al enviar el correo");
         }
     }
-    
 }

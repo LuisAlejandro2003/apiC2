@@ -10,7 +10,7 @@ export class CreateUsers {
         private usersRepository: UsersRepository,
         private findContactByEmail: FindContactByEmail,
         private eventPublisher: EventPublisher,
-        private passwordHasher: PasswordHasher // Inyecta la dependencia usando el puerto
+        private passwordHasher: PasswordHasher 
     ) {}
 
     async execute(userData: { email: string; password: string; }): Promise<void> {

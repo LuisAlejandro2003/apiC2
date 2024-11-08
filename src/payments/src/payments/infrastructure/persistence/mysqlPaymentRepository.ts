@@ -34,7 +34,7 @@ export class MysqlPaymentRepository implements PaymentRepository {
     }
 
     async findById(uuid: string): Promise<Payment | null> {
-        const [rows]: any = await this.db.query('SELECT * FROM payments WHERE uuid = ?', [uuid]);
+        const [rows]: any = await this.db.query('SELECT * FROM Payments WHERE uuid = ?', [uuid]);
         if (rows.length === 0) return null;
 
         const row = rows[0];
@@ -54,7 +54,7 @@ export class MysqlPaymentRepository implements PaymentRepository {
     }
 
     async findAll(): Promise<Payment[]> {
-        const [rows]: any = await this.db.query('SELECT * FROM payments');
+        const [rows]: any = await this.db.query('SELECT * FROM Payments');
         return rows.map((row: any) => new Payment(
             row.uuid,
             row.title,
@@ -69,5 +69,12 @@ export class MysqlPaymentRepository implements PaymentRepository {
             row.contactId
         ));
     }
+
+
+    async deleteById(uuid: string): Promise<void> {
+        const query = 'DELETE FROM Payments WHERE uuid = ?';
+        await this.db.execute(query, [uuid]);
+    }
+
 }
 

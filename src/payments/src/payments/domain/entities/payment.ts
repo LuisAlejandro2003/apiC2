@@ -1,4 +1,3 @@
-// src/payments/domain/entities/payment.ts
 import { PaymentStatus } from '../value-objects/paymentStatus';
 
 export class Payment {
@@ -15,4 +14,18 @@ export class Payment {
         public status: PaymentStatus,
         public readonly contactId: string
     ) {}
+
+    markAsPaid() {
+        if (this.status !== PaymentStatus.PENDIENTE) {
+            throw new Error('Payment can only be marked as paid if it is pending');
+        }
+        this.status = PaymentStatus.PAGADO;
+    }
+
+    cancel() {
+        if (this.status !== PaymentStatus.PENDIENTE) {
+            throw new Error('Only pending payments can be cancelled');
+        }
+        this.status = PaymentStatus.CANCELADO;
+    }
 }
