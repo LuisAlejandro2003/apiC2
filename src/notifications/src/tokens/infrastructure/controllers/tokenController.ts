@@ -10,8 +10,8 @@ export class TokenController {
 
     async handleTokenGeneration(req: Request, res: Response): Promise<void> {
         try {
-            const data = GenerateTokenDTO.validate(req.body);
-            await this.generateToken.execute(data.contactId, data.phoneNumber);
+            const { contactId, phoneNumber, email, notificationPreference } = req.body;
+            await this.generateToken.execute(contactId, phoneNumber, email, notificationPreference);
             res.status(200).send({ message: 'Token generated and sent successfully' });
         } catch (error) {
             console.error('Error generating and sending token:', error);

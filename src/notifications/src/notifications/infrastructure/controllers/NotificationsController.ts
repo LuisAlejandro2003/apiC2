@@ -1,3 +1,4 @@
+// NotificationsController.ts
 import { SendNotification } from '../../application/use-cases/sendNotification';
 import { GenerateToken } from '../../../tokens/application/use-cases/generateToken';
 
@@ -7,10 +8,15 @@ export class NotificationsController {
         public generateToken?: GenerateToken
     ) {}
 
-    async handleNotification(event: string, payload: { email: string; contactId?: string; phoneNumber?: string; amount?: number; approvalUrl?: string }): Promise<void> {
+    async handleNotification(event: string, payload: { email: string; contactId?: string; phoneNumber?: string; amount?: number; approvalUrl?: string; notificationPreference: string }): Promise<void> {
         if (event === 'user.created' && this.generateToken) {
             try {
-                await this.generateToken.execute(payload.contactId!, payload.phoneNumber!);
+                await this.generateToken.execute(
+                    payload.contactId!,
+                    payload.phoneNumber!,
+                    payload.email,
+                    payload.notificationPreference || 'whatsapp' // Valor por defecto
+                );
                 console.log(`Token generado y enviado a ${payload.phoneNumber} para el evento ${event}`);
                 return;
             } catch (error) {
@@ -26,6 +32,7 @@ export class NotificationsController {
             phoneNumber: payload.phoneNumber || '',
             amount: payload.amount,
             approvalUrl: payload.approvalUrl,
+            notificationPreference: payload.notificationPreference || 'whatsapp'
         });
     }
 }

@@ -1,21 +1,21 @@
-// sendNotification.ts
+// notificationService.ts
+import { EmailServicePort } from '../../domain/ports/EmailServicePort';
+import { WhatsAppServicePort } from '../../domain/ports/WhatsAppServicePort'; 
 import { NotificationsRepository } from '../../domain/ports/NotificationsRepository';
 import { Notifications } from '../../domain/entities/notifications';
 import { NotificationId } from '../../domain/value-objects/notificationId';
-import { EmailServicePort } from '../../domain/ports/EmailServicePort';
-import { WhatsAppServicePort } from '../../domain/ports/WhatsAppServicePort';
 
-export class SendNotification {
+export class NotificationService {
     constructor(
-        private readonly notificationsRepository: NotificationsRepository,
         private readonly emailService: EmailServicePort,
-        private readonly whatsappService: WhatsAppServicePort // Añadir el servicio de WhatsApp
+        private readonly whatsappService: WhatsAppServicePort,
+        private readonly notificationsRepository: NotificationsRepository
     ) {}
 
-    async execute(notificationData: { event: string; contactId: string; email: string; phoneNumber: string; amount?: number; approvalUrl?: string; notificationPreference: string }): Promise<void> {
+    async send(notificationData: { event: string; contactId: string; email: string; phoneNumber: string; amount?: number; approvalUrl?: string; notificationPreference: string }): Promise<void> {
         const message = this.buildMessage(notificationData);
         const notificationId = new NotificationId();
-        
+
         const notification = new Notifications(
             notificationId,
             notificationData.contactId,
@@ -25,23 +25,11 @@ export class SendNotification {
         );
 
         try {
-            // Enviar la notificación según la preferencia
             if (notificationData.notificationPreference === 'whatsapp') {
-                // Verificar que el número de teléfono esté definido para enviar por WhatsApp
-                if (!notificationData.phoneNumber) {
-                    throw new Error('No phone number defined for WhatsApp notification');
-                }
                 await this.whatsappService.send(notificationData.phoneNumber, message);
-            } else if (notificationData.notificationPreference === 'email') {
-                // Verificar que el correo esté definido para enviar por email
-                if (!notificationData.email) {
-                    throw new Error('No email address defined for email notification');
-                }
-                await this.emailService.send(notificationData.email, message);
             } else {
-                throw new Error('Invalid notification preference');
+                await this.emailService.send(notificationData.email, message);
             }
-            
             notification.dateSent = new Date();
         } catch (error) {
             console.error('Failed to send notification:', error);
@@ -50,7 +38,7 @@ export class SendNotification {
 
         await this.notificationsRepository.save(notification);
     }
-    
+
     private buildMessage(data: { event: string; contactId: string; email: string; phoneNumber: string; amount?: number; approvalUrl?: string }): string {
         switch (data.event) {
             case 'contact.created':

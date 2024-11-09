@@ -4,15 +4,6 @@ import { ContactId } from '../../domain/value-objects/contactId';
 import { EventPublisher } from '../../domain/ports/EventPublisher';
 
 export class CreateContacts {
-    private emittedEvents: Set<string> = new Set();
-
-    private isDuplicateEvent(event: string): boolean {
-        if (this.emittedEvents.has(event)) {
-            return true;
-        }
-        this.emittedEvents.add(event);
-        return false;
-    }
     constructor(
         private contactsRepository: ContactsRepository,
         private eventPublisher: EventPublisher
@@ -24,6 +15,7 @@ export class CreateContacts {
         firstName: string;
         lastName: string;
         phoneNumber: string;
+        notificationPreference: string;
     }): Promise<void> {
         const contacts = new Contacts(
             contactData.uuid ?? ContactId.generateUUID(),
@@ -32,16 +24,15 @@ export class CreateContacts {
             contactData.lastName,
             contactData.phoneNumber
         );
+        
         await this.contactsRepository.createContact(contacts);
 
-        // Emit event after creating the contact
-        // Emit event after creating the contact only if not already emitted
-if (!this.isDuplicateEvent('contact.created')) {
-    await this.eventPublisher.emit('contact.created', {
-        contactId: contacts.getContactsId().value,
-        email: contacts.getEmail(),
-        phoneNumber: contacts.getPhoneNumber()
-    });
-}
+        // Emitir evento después de crear el contacto sin restricciones
+        await this.eventPublisher.emit('contact.created', {
+            contactId: contacts.getContactsId().value,
+            email: contacts.getEmail(),
+            phoneNumber: contacts.getPhoneNumber(),
+            notificationPreference: contactData.notificationPreference
+        });
     }
 }

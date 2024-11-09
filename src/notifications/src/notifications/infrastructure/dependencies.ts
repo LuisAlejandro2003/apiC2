@@ -4,6 +4,7 @@ import { NotificationsController } from './controllers/NotificationsController';
 import { SendNotification } from '../application/use-cases/sendNotification';
 import { PostgresNotificationsRepository } from './persistence/postgresNotificationsRepository';
 import { EmailService } from './services/emailService';
+import { WhatsAppService } from './services/whatsappService'; // Asegúrate de importar el servicio de WhatsApp
 import { RabbitMQListener } from './adapters/rabbitMQListener';
 
 dotenv.config();
@@ -18,7 +19,8 @@ export async function initializeDependencies(): Promise<{
 
     const notificationsRepository = new PostgresNotificationsRepository(postgresPool);
     const emailService = new EmailService();
-    const sendNotification = new SendNotification(notificationsRepository, emailService);
+    const whatsappService = new WhatsAppService(); // Crear instancia del servicio de WhatsApp
+    const sendNotification = new SendNotification(notificationsRepository, emailService, whatsappService);
     const notificationsController = new NotificationsController(sendNotification);
     const rabbitMQListener = new RabbitMQListener(notificationsController);
 

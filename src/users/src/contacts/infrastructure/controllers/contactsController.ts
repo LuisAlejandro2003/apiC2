@@ -16,8 +16,11 @@ export class ContactsController {
 
     async create(req: Request, res: Response): Promise<void> {
         try {
-            await this.createContacts.execute(req.body);
-            res.status(201).send('Contacts created successfully');
+            await this.createContacts.execute({
+                ...req.body,
+                notificationPreference: req.body.notificationPreference || 'whatsapp'  // Valor por defecto
+            });
+            res.status(201).send('Contact created successfully');
         } catch (error) {
             res.status(500).send(error);
         }

@@ -1,4 +1,3 @@
-// src/notifications/infrastructure/adapters/rabbitMQListener.ts
 import amqp from 'amqplib';
 import { MessageQueueListener } from '../../domain/ports/MessageQueueListener';
 import { NotificationsController } from '../controllers/NotificationsController';
@@ -15,9 +14,20 @@ export class RabbitMQListener implements MessageQueueListener {
             await channel.assertQueue(queue, { durable: true });
             channel.consume(queue, async (msg) => {
                 if (msg) {
-                    const payload = JSON.parse(msg.content.toString());
-                    await this.notificationsController.handleNotification(queue, payload);
-                    channel.ack(msg);
+                    try {
+                        const content = msg.content.toString();
+                        const payload = content ? JSON.parse(content) : null;
+                        
+                        if (payload) {
+                            await this.notificationsController.handleNotification(queue, payload);
+                        } else {
+                            console.error(`Mensaje vacío o inválido en la cola ${queue}`);
+                        }
+                    } catch (error) {
+                        console.error(`Error al procesar el mensaje en la cola ${queue}:`, error);
+                    } finally {
+                        channel.ack(msg);
+                    }
                 }
             });
         }
