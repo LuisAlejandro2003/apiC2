@@ -1,8 +1,10 @@
+// createPayment.ts
 import { v4 as uuidv4 } from 'uuid';
 import { PaymentStatus } from '../../domain/value-objects/paymentStatus';
 import { Payment } from '../../domain/entities/payment';
 import { CreatePaymentOrder } from './createPaymentOrder';
 import { StorePayment } from './storePayment';
+import { PaymentDetails } from '../dto/PaymentDetails';
 
 export class CreatePayment {
     constructor(
@@ -10,7 +12,7 @@ export class CreatePayment {
         private readonly storePayment: StorePayment
     ) {}
 
-    async execute(paymentDetails: Omit<Payment, 'uuid' | 'approvalUrl'>): Promise<string> {
+    async execute(paymentDetails: PaymentDetails): Promise<string> {
         const generatedUuid = uuidv4();
         const approvalLink = await this.createPaymentOrder.execute(paymentDetails);
 
@@ -25,7 +27,9 @@ export class CreatePayment {
             paymentDetails.failureUrl,
             approvalLink,
             PaymentStatus.PENDIENTE,
-            paymentDetails.contactId
+            paymentDetails.contactId,
+            paymentDetails.notificationPreference,
+            paymentDetails.phoneNumber
         );
 
         await this.storePayment.execute(payment);

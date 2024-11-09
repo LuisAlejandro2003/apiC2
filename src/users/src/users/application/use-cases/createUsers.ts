@@ -1,3 +1,4 @@
+// createUser.ts
 import { Users } from '../../domain/entities/users';
 import { UsersRepository } from '../../domain/ports/usersRepository';
 import { UserId } from '../../domain/value-objects/userId';
@@ -13,7 +14,7 @@ export class CreateUsers {
         private passwordHasher: PasswordHasher 
     ) {}
 
-    async execute(userData: { email: string; password: string; }): Promise<void> {
+    async execute(userData: { email: string; password: string; notificationPreference?: string }): Promise<void> {
         // Buscar el contacto por email
         const contacts = await this.findContactByEmail.execute(userData.email);
         if (!contacts) {
@@ -45,8 +46,9 @@ export class CreateUsers {
         // Emitir evento de creación usando el puerto
         await this.eventPublisher.emit('user.created', {
             email: userData.email,
-            contactId: userId.value,
-            phoneNumber: phoneNumber
+            contactId: contactId.value,  // Incluir el ID correcto de contacto
+            phoneNumber: phoneNumber,
+            notificationPreference: userData.notificationPreference || 'whatsapp' // Nuevo campo para preferencia
         });
     }
 }

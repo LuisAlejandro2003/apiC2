@@ -14,13 +14,13 @@ export class UsersController {
 
     async create(req: Request, res: Response): Promise<void> {
         try {
-            const { email, password } = req.body;
+            const { email, password , notificationPreference  } = req.body;
             if (!email || !password) {
                 res.status(400).send({ message: 'Email and password are required' });
                 return;
             }
 
-            await this.createUsers.execute({ email, password });
+            await this.createUsers.execute({ email, password , notificationPreference});
             res.status(201).send({ message: 'User created successfully' });
         } catch (error) {
             console.error('Error creating user:', error);

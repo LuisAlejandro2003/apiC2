@@ -12,7 +12,9 @@ export class Payment {
         public readonly failureUrl: string,
         public readonly approvalUrl: string,
         public status: PaymentStatus,
-        public readonly contactId: string
+        public readonly contactId: string,
+        public readonly notificationPreference?: string,
+        public readonly phoneNumber?: string // Agregar phoneNumber como opcional
     ) {}
 
     markAsPaid() {

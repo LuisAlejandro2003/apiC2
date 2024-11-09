@@ -14,7 +14,7 @@ export class MongoUsersRepository implements UsersRepository {
 
     async updateVerifiedAt(userId: string, verifiedAt: string): Promise<void> {
         await this.db.collection('users').updateOne(
-            { id: userId },
+            { contactId: userId },
             { $set: { verifiedAt } }
         );
     }

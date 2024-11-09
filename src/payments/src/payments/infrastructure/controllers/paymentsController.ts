@@ -1,8 +1,10 @@
+// paymentsController.ts
 import { Request, Response } from 'express';
 import { CreatePayment } from '../../application/use-cases/createPayment';
 import { GetAllPayments } from '../../application/use-cases/getAllPayments';
 import { GetPaymentById } from '../../application/use-cases/getPaymentById';
 import { DeletePaymentById } from '../../application/use-cases/deletePaymentById';
+import { PaymentDetails } from '../../application/dto/PaymentDetails';
 
 export class PaymentsController {
     constructor(
@@ -14,7 +16,34 @@ export class PaymentsController {
 
     async create(req: Request, res: Response): Promise<void> {
         try {
-            const approvalUrl = await this.createPayment.execute(req.body);
+            const {
+                title,
+                emailUser,
+                amount,
+                productId,
+                externalReference,
+                successUrl,
+                failureUrl,
+                contactId,
+                notificationPreference,
+                phoneNumber
+            } = req.body;
+
+            const paymentDetails: PaymentDetails = {
+                title,
+                emailUser,
+                amount,
+                productId,
+                externalReference,
+                successUrl,
+                failureUrl,
+                contactId,
+                notificationPreference,
+                phoneNumber
+            };
+
+            const approvalUrl = await this.createPayment.execute(paymentDetails);
+
             res.status(201).json({ approvalUrl });
         } catch (error) {
             console.error('Error creating payment:', error);
@@ -36,7 +65,7 @@ export class PaymentsController {
         try {
             const payment = await this.getPaymentById.execute(req.params.id);
             if (!payment) {
-                res.status(404).json({ message: 'Payment not found' }); // Elimina el `return`
+                res.status(404).json({ message: 'Payment not found' });
                 return;
             }
             res.status(200).json(payment);
